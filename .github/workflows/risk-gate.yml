@@ -19,10 +19,10 @@ jobs:
       PR: ${{ github.event.pull_request.number }}
       REPO: ${{ github.repository }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.base.sha }}
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           repository: pablosancheznunez/research-tools-ops
           path: .ops

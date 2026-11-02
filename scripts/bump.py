@@ -1,7 +1,10 @@
 """Bump the patch version in every file listed in .maintenance.json.
 
-The current version is read from CITATION.cff. Prints the new version.
-Usage: python bump.py <maintenance.json>
+Release commits live only on their tag, never on main, so main keeps the
+version of its last manual edit. The next version is one patch above the
+higher of that version and the latest tag. Prints the new version.
+
+Usage: python bump.py <maintenance.json> [<latest tag version>]
 """
 
 import json
@@ -15,8 +18,12 @@ def current_version(root):
     return re.search(r'^version:\s*"?(\d+\.\d+\.\d+)"?', text, re.M).group(1)
 
 
+def parse(version):
+    return tuple(int(x) for x in version.split("."))
+
+
 def next_patch(version):
-    major, minor, patch = (int(x) for x in version.split("."))
+    major, minor, patch = parse(version)
     return f"{major}.{minor}.{patch + 1}"
 
 
@@ -33,7 +40,8 @@ if __name__ == "__main__":
     policy_path = Path(sys.argv[1])
     root = policy_path.parent
     policy = json.loads(policy_path.read_text(encoding="utf-8"))
-    old = current_version(root)
-    new = next_patch(old)
-    bump(root, policy["release"]["version_files"], old, new)
+    in_files = current_version(root)
+    candidates = [in_files] + [v for v in sys.argv[2:3] if re.fullmatch(r"\d+\.\d+\.\d+", v)]
+    new = next_patch(max(candidates, key=parse))
+    bump(root, policy["release"]["version_files"], in_files, new)
     print(new)

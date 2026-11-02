@@ -24,19 +24,22 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           node-version: "24"
       - name: Anything to release?
         id: changes
         run: |
-          last=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          # Release commits sit on their tags, not on main, so take the
+          # highest tag rather than the nearest ancestor.
+          last=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
+          echo "last=${last#v}" >> "$GITHUB_OUTPUT"
           if [ -z "$last" ]; then
             n=$(git rev-list --count HEAD)
           else
@@ -53,10 +56,11 @@ jobs:
         if: steps.changes.outputs.count != '0'
         run: |
           git clone -q --depth 1 https://github.com/pablosancheznunez/research-tools-ops /tmp/ops
-          version=$(python3 /tmp/ops/scripts/bump.py .maintenance.json)
+          version=$(python3 /tmp/ops/scripts/bump.py .maintenance.json "${{ steps.changes.outputs.last }}")
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -qam "Release v$version"
           git tag "v$version"
-          git push -q origin HEAD "v$version"
+          # Only the tag is pushed: main stays protected, with no bypass for Actions.
+          git push -q origin "v$version"
           gh release create "v$version" --title "v$version" --generate-notes

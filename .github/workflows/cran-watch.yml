@@ -1,7 +1,8 @@
 # Reads the package's public CRAN check results. Fails (and so opens a
 # maintenance issue through the calling repository) when any CRAN flavour
 # reports ERROR, WARN or FAIL, so problems are seen before CRAN's deadline.
-# Packages not yet on CRAN pass silently. No credentials are used.
+# Packages not yet on CRAN pass silently. When CRAN publishes a new version,
+# it is released on GitHub too. No credentials beyond the built-in token.
 name: CRAN watch
 
 on:
@@ -13,7 +14,7 @@ on:
         required: true
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   cran:
@@ -43,3 +44,25 @@ jobs:
             exit 1
           fi
           echo "All CRAN checks OK or NOTE for $PKG: $url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Release the version CRAN published
+        # When CRAN accepts a new version, tag it and publish a GitHub release
+        # (Zenodo then mints its DOI), so GitHub and CRAN versions never diverge.
+        env:
+          PKG: ${{ inputs.package }}
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          version=$(curl -s "https://cran.r-project.org/web/packages/${PKG}/index.html" \
+            | tr -d '\n' | grep -oE 'Version:</td>[[:space:]]*<td>[0-9.\-]+' | grep -oE '[0-9][0-9.\-]*$' || true)
+          if [ -z "$version" ]; then
+            echo "No CRAN version to release." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if gh release view "v$version" --repo "$REPO" >/dev/null 2>&1; then
+            echo "v$version is already released." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          gh release create "v$version" --repo "$REPO" --target main --title "v$version" \
+            --notes "Version $version, as published on CRAN: https://cran.r-project.org/package=${PKG}"
+          echo "Released v$version to match CRAN." >> "$GITHUB_STEP_SUMMARY"

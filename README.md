@@ -21,8 +21,8 @@ It serves these projects:
 | --- | --- | --- |
 | `risk-gate.yml` | every pull request | Labels the change `risk:low`, `risk:medium` or `risk:high` from the paths it touches, and auto-merges automated `repair/*` changes below high once CI passes |
 | `repair.yml` | a failed CI or weekly live check on `main` | Asks the configured repair agent for a fix, opens a pull request and sends it through the same gate; without an agent, opens an issue |
-| `auto-release.yml` | the first day of each month | If `main` changed and the tests pass, tags a patch release and publishes it; Zenodo mints the version DOI |
-| `cran-watch.yml` | every Wednesday (R packages) | Reads the package's public CRAN check results and fails if any platform reports ERROR, WARN or FAIL, which opens a maintenance issue |
+| `auto-release.yml` | the first day of each month (projects not on CRAN) | If `main` changed and the tests pass, tags a patch release and publishes it; Zenodo mints the version DOI |
+| `cran-watch.yml` | every Wednesday (R packages) | Reads the package's public CRAN check results and fails if any platform reports ERROR, WARN or FAIL, which opens a maintenance issue; when CRAN publishes a new version, releases it on GitHub (and Zenodo) automatically |
 
 ## Rules enforced in code
 

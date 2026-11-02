@@ -37,17 +37,17 @@ jobs:
       RUN_ID: ${{ inputs.run_id }}
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
         with:
           repository: pablosancheznunez/research-tools-ops
           path: .ops
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: "22"
+          node-version: "24"
 
       - name: Decide whether the agent may run
         id: gate

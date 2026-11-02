@@ -6,7 +6,7 @@ Two reusable GitHub Actions workflows that keep open research software published
 
 | Workflow | Used by | Does |
 | --- | --- | --- |
-| `cran-watch.yml` | uxlearn, narrativecv, reproimage (every Wednesday) | Reads the package's public CRAN check results and fails if any platform reports ERROR, WARN or FAIL, so problems surface before CRAN's deadline. When CRAN publishes a new version, it creates the matching GitHub release, and Zenodo mints its DOI. |
+| `cran-watch.yml` | uxlearn, narrativecv, reproimage, visualbrief (every Wednesday) | Reads the package's public CRAN check results and fails if any platform reports ERROR, WARN or FAIL, so problems surface before CRAN's deadline. When CRAN publishes a new version, it creates the matching GitHub release, and Zenodo mints its DOI. |
 | `auto-release.yml` | openresearchmetrics, ixd-lab (first day of each month) | If `main` changed and the tests pass, tags a patch release and publishes it; Zenodo mints its DOI. The version bump lives only on the tag, so `main` stays protected. |
 
 Every project also runs its own CI on every change and weekly against the newest versions of its dependencies. GitHub emails the maintainer when any scheduled run fails; nothing else needs watching.

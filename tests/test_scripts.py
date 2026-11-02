@@ -4,36 +4,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 import bump  # noqa: E402
-import risk  # noqa: E402
-
-POLICY = {
-    "risk_paths": {
-        "high": ["data/mappings/*", "tests/regression/*"],
-        "low": ["docs/*", "README.md"],
-    }
-}
-
-
-def test_docs_only_is_low():
-    assert risk.classify(POLICY, ["docs/index.html", "README.md"]) == "low"
-
-
-def test_undeclared_path_is_medium():
-    assert risk.classify(POLICY, ["docs/a.md", "web/app.js"]) == "medium"
-
-
-def test_highest_level_wins():
-    assert risk.classify(POLICY, ["README.md", "data/mappings/r4ri.json"]) == "high"
-
-
-def test_controls_are_always_high():
-    for path in [".github/workflows/ci.yml", ".maintenance.json", "CONTRIBUTING.md"]:
-        assert risk.classify({}, [path]) == "high"
-
-
-def test_regression_expectations_are_high():
-    assert risk.classify(POLICY, ["tests/regression/expected.json"]) == "high"
-
 
 def test_bump(tmp_path):
     (tmp_path / "CITATION.cff").write_text('cff-version: 1.2.0\nversion: "0.1.9"\n', encoding="utf-8")

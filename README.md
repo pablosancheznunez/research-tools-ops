@@ -19,9 +19,10 @@ It serves these projects:
 
 | Reusable workflow | Called by each project on | Does |
 | --- | --- | --- |
-| `risk-gate.yml` | every pull request | Labels the change `risk:low`, `risk:medium` or `risk:high` from the paths it touches, and auto-merges Dependabot and `repair/*` changes below high once CI passes |
+| `risk-gate.yml` | every pull request | Labels the change `risk:low`, `risk:medium` or `risk:high` from the paths it touches, and auto-merges automated `repair/*` changes below high once CI passes |
 | `repair.yml` | a failed CI or weekly live check on `main` | Asks the configured repair agent for a fix, opens a pull request and sends it through the same gate; without an agent, opens an issue |
 | `auto-release.yml` | the first day of each month | If `main` changed and the tests pass, tags a patch release and publishes it; Zenodo mints the version DOI |
+| `cran-watch.yml` | every Wednesday (R packages) | Reads the package's public CRAN check results and fails if any platform reports ERROR, WARN or FAIL, which opens a maintenance issue |
 
 ## Rules enforced in code
 
@@ -30,7 +31,7 @@ It serves these projects:
 3. **Bounded attempts.** At most one open automatic repair at a time and three in seven days, then a `needs-attention` issue.
 4. **Least privilege.** The repair agent only edits files; the workflow commits them with a token that cannot change workflows. Publication to Zenodo goes through GitHub's own integration, so no publishing credential is ever exposed.
 5. **Releases never touch `main`.** The version bump lives only on the release tag, so `main` stays protected with no exceptions.
-6. **Works without an agent.** If none is configured, failures become issues and everything else (Dependabot, auto-merge, releases) keeps running.
+6. **No credentials needed.** Everything runs on GitHub Actions with its built-in token. Actions are pinned to major versions, which receive fixes on their own, and weekly CI runs against the newest R and Python packages, so there are no update pull requests to approve. An automatic repair agent is optional; without one, failures become issues.
 
 ## Adding a project
 

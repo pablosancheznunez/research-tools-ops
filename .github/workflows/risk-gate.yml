@@ -1,0 +1,51 @@
+# Labels a pull request with its risk level and, for automated low or medium
+# changes (Dependabot, ai/* branches), turns on auto-merge. High-risk changes
+# get "needs-human" and wait for the code owner. Called on pull_request_target:
+# it reads the list of changed files through the API and never runs PR code.
+name: Risk gate
+
+on:
+  workflow_call:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR: ${{ github.event.pull_request.number }}
+      REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+      - uses: actions/checkout@v4
+        with:
+          repository: pablosancheznunez/research-tools-ops
+          path: .ops
+      - name: Classify
+        id: risk
+        run: |
+          mapfile -t files < <(gh pr diff "$PR" --repo "$REPO" --name-only)
+          level=$(python3 .ops/scripts/risk.py .maintenance.json "${files[@]}")
+          echo "level=$level" >> "$GITHUB_OUTPUT"
+          for l in low medium high; do
+            gh label create "risk:$l" --repo "$REPO" --force >/dev/null
+            gh pr edit "$PR" --repo "$REPO" --remove-label "risk:$l" >/dev/null 2>&1 || true
+          done
+          gh pr edit "$PR" --repo "$REPO" --add-label "risk:$level"
+          echo "Risk level: $level" >> "$GITHUB_STEP_SUMMARY"
+      - name: Ask for a human on high risk
+        if: steps.risk.outputs.level == 'high'
+        run: |
+          gh label create needs-human --repo "$REPO" --color B60205 --force >/dev/null
+          gh pr edit "$PR" --repo "$REPO" --add-label needs-human
+      - name: Auto-merge automated low and medium changes
+        if: >-
+          steps.risk.outputs.level != 'high' &&
+          (github.event.pull_request.user.login == 'dependabot[bot]' ||
+           startsWith(github.event.pull_request.head.ref, 'ai/'))
+        run: gh pr merge "$PR" --repo "$REPO" --auto --squash

@@ -1,0 +1,62 @@
+# Publishes a patch release when main has changed since the last release and
+# the tests pass. The GitHub release triggers the Zenodo integration, which
+# mints a version DOI when the repository is switched on in Zenodo.
+name: Auto release
+
+on:
+  workflow_call:
+    inputs:
+      setup:
+        description: Shell command that installs what the tests need
+        type: string
+        default: "true"
+      test:
+        description: Shell command that runs the tests
+        type: string
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Anything to release?
+        id: changes
+        run: |
+          last=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          if [ -z "$last" ]; then
+            n=$(git rev-list --count HEAD)
+          else
+            n=$(git rev-list --count "$last"..HEAD)
+          fi
+          echo "count=$n" >> "$GITHUB_OUTPUT"
+          echo "Commits since ${last:-the start}: $n" >> "$GITHUB_STEP_SUMMARY"
+      - name: Test
+        if: steps.changes.outputs.count != '0'
+        run: |
+          ${{ inputs.setup }}
+          ${{ inputs.test }}
+      - name: Bump, tag and release
+        if: steps.changes.outputs.count != '0'
+        run: |
+          git clone -q --depth 1 https://github.com/pablosancheznunez/research-tools-ops /tmp/ops
+          version=$(python3 /tmp/ops/scripts/bump.py .maintenance.json)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -qam "Release v$version"
+          git tag "v$version"
+          git push -q origin HEAD "v$version"
+          gh release create "v$version" --title "v$version" --generate-notes

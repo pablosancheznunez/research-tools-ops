@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use research-tools-ops, please cite it as below."
+type: software
+title: "research-tools-ops: shared AI-assisted maintenance for open research tools"
+version: 0.1.0
+date-released: 2026-11-02
+authors:
+  - family-names: "Sánchez-Núñez"
+    given-names: "Pablo"
+    orcid: "https://orcid.org/0000-0001-7845-9506"
+repository-code: "https://github.com/pablosancheznunez/research-tools-ops"
+license: MIT
+doi: 10.5281/zenodo.23881629
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.23881629
+    description: "Concept DOI: all versions, resolves to the latest"
+  - type: doi
+    value: 10.5281/zenodo.23881630
+    description: "First release"

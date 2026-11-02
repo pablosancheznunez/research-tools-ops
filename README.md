@@ -1,5 +1,7 @@
 # research-tools-ops
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23881629.svg)](https://doi.org/10.5281/zenodo.23881629)
+
 Shared, AI-assisted maintenance for three open research tools:
 
 - [narrative-cv-crosswalk](https://github.com/pablosancheznunez/narrative-cv-crosswalk): links narrative CV sections to evidence in ORCID, OpenAIRE, OpenAlex and DataCite.

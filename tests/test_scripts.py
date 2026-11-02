@@ -27,7 +27,7 @@ def test_highest_level_wins():
 
 
 def test_controls_are_always_high():
-    for path in [".github/workflows/ci.yml", ".maintenance.json", "CLAUDE.md"]:
+    for path in [".github/workflows/ci.yml", ".maintenance.json", "CONTRIBUTING.md"]:
         assert risk.classify({}, [path]) == "high"
 
 

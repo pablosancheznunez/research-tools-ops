@@ -1,5 +1,5 @@
 # Labels a pull request with its risk level and, for automated low or medium
-# changes (Dependabot, ai/* branches), turns on auto-merge. High-risk changes
+# changes (Dependabot, repair/* branches), turns on auto-merge. High-risk changes
 # get "needs-human" and wait for the code owner. Called on pull_request_target:
 # it reads the list of changed files through the API and never runs PR code.
 name: Risk gate
@@ -47,5 +47,5 @@ jobs:
         if: >-
           steps.risk.outputs.level != 'high' &&
           (github.event.pull_request.user.login == 'dependabot[bot]' ||
-           startsWith(github.event.pull_request.head.ref, 'ai/'))
+           startsWith(github.event.pull_request.head.ref, 'repair/'))
         run: gh pr merge "$PR" --repo "$REPO" --auto --squash

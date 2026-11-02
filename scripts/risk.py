@@ -13,7 +13,7 @@ ORDER = ["low", "medium", "high"]
 
 # Paths that are high risk in every repository: changing them could weaken
 # the controls that keep automatic changes safe.
-ALWAYS_HIGH = [".github/*", ".github/**", ".maintenance.json", "CODEOWNERS", "CLAUDE.md"]
+ALWAYS_HIGH = [".github/*", ".github/**", ".maintenance.json", "CODEOWNERS", "CONTRIBUTING.md"]
 
 
 def matches(path, patterns):

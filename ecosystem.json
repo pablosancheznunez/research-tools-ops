@@ -1,0 +1,26 @@
+{
+  "owner": "pablosancheznunez",
+  "catalogue": "https://raw.githubusercontent.com/pablosancheznunez/metascience/main/inst/extdata/catalogue.json",
+  "repositories": [
+    {"repo": "metascience", "cran": "metascience", "site": "https://pablosancheznunez.com/metascience/"},
+    {"repo": "openresearchmetrics", "cran": null, "site": "https://pablosancheznunez.com/openresearchmetrics/"},
+    {"repo": "narrative-cv-crosswalk", "cran": "narrativecv", "site": "https://pablosancheznunez.com/narrative-cv-crosswalk/"},
+    {"repo": "academiccareer", "cran": "academiccareer", "site": "https://pablosancheznunez.com/academiccareer/"},
+    {"repo": "aitrail", "cran": "aitrail", "site": "https://pablosancheznunez.com/aitrail/"},
+    {"repo": "aiinresearch", "cran": "aiinresearch", "site": null},
+    {"repo": "scicomm", "cran": "scicomm", "site": "https://pablosancheznunez.com/scicomm/"},
+    {"repo": "FoSci", "cran": "FoSci", "site": null},
+    {"repo": "reproimage", "cran": "reproimage", "site": "https://pablosancheznunez.com/reproimage/"},
+    {"repo": "researchreproducibility", "cran": "researchreproducibility", "site": null},
+    {"repo": "repro2impact", "cran": null, "site": "https://pablosancheznunez.com/repro2impact/"},
+    {"repo": "research-tools-ops", "cran": null, "site": null},
+    {"repo": "neuroconsumer", "cran": "neuroconsumer", "site": "https://pablosancheznunez.com/neuroconsumer/"},
+    {"repo": "uxlearn", "cran": "uxlearn", "site": "https://pablosancheznunez.com/uxlearn/"},
+    {"repo": "visualbrief", "cran": "visualbrief", "site": "https://pablosancheznunez.com/visualbrief/"},
+    {"repo": "abfunnel", "cran": "abfunnel", "site": "https://pablosancheznunez.com/abfunnel/"},
+    {"repo": "photoarchive", "cran": "photoarchive", "site": "https://pablosancheznunez.com/photoarchive/"},
+    {"repo": "ixd-lab", "cran": null, "site": "https://pablosancheznunez.com/ixd-lab/"},
+    {"repo": "synthviscom", "cran": null, "site": "https://pablosancheznunez.com/synthviscom/"},
+    {"repo": "pablosancheznunez.github.io", "cran": null, "site": "https://pablosancheznunez.com/"}
+  ]
+}

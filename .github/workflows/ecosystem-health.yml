@@ -1,0 +1,43 @@
+# Weekly health report for the whole ecosystem: CI on main, open issues and
+# pull requests, CRAN checks, websites and the links of the metascience
+# catalogue. Keeps one open "Ecosystem health" issue up to date; GitHub emails
+# the maintainer when it changes. Read-only towards the other repositories.
+name: Ecosystem health
+
+on:
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Build the report
+        id: health
+        run: |
+          python scripts/health.py ecosystem.json > report.md
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Update the health issue
+        run: |
+          gh label create health --color C2E0C6 2>/dev/null || true
+          existing=$(gh issue list --label health --state open --json number -q '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --body-file report.md
+            if [ "${{ steps.health.outputs.problems }}" != "0" ]; then
+              gh issue comment "$existing" --body "This week's report found ${{ steps.health.outputs.problems }} problem(s); see the issue description."
+            fi
+          else
+            gh issue create --title "Ecosystem health" --label health --body-file report.md
+          fi

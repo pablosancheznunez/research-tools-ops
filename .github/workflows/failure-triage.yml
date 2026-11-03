@@ -1,0 +1,67 @@
+# Reusable: called by a repository's CI when it fails on the default branch.
+# Classifies the failure, marks its risk from CODEOWNERS, asks Claude for a
+# diagnosis when the ANTHROPIC_API_KEY secret is available, and opens or
+# updates one "CI failure" issue. It never edits code or opens pull requests.
+#
+#   triage:
+#     needs: [r-package]
+#     if: failure() && github.event_name != 'pull_request'
+#     uses: pablosancheznunez/research-tools-ops/.github/workflows/failure-triage.yml@main
+#     permissions:
+#       contents: read
+#       actions: read
+#       issues: write
+#     secrets: inherit
+name: Failure triage
+
+on:
+  workflow_call:
+    secrets:
+      ANTHROPIC_API_KEY:
+        required: false
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      RUN_ID: ${{ github.run_id }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Collect the failed log and the changed files
+        run: |
+          gh run view "$RUN_ID" --repo "$REPO" --log-failed > failed.log 2>/dev/null || true
+          git diff --name-only HEAD~1 HEAD > changed.txt 2>/dev/null || true
+          git clone -q --depth 1 https://github.com/pablosancheznunez/research-tools-ops /tmp/ops
+      - name: Triage
+        id: triage
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$ANTHROPIC_API_KEY" ]; then pip install -q anthropic; fi
+          python /tmp/ops/scripts/triage.py failed.log changed.txt .github/CODEOWNERS > issue.md
+          cat issue.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Open or update the issue
+        env:
+          RISK: ${{ steps.triage.outputs.risk }}
+        run: |
+          gh label create maintenance --repo "$REPO" --color BFD4F2 2>/dev/null || true
+          gh label create "risk:$RISK" --repo "$REPO" --color FBCA04 2>/dev/null || true
+          existing=$(gh issue list --repo "$REPO" --label maintenance --state open --search "CI failure in:title" --json number -q '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body-file issue.md
+          else
+            gh issue create --repo "$REPO" --title "CI failure on main" --label maintenance --label "risk:$RISK" --body-file issue.md
+          fi
